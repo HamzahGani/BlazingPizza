@@ -1,5 +1,6 @@
 ﻿@page "/myorders"
 @inject HttpClient HttpClient
+@implements IDisposable
 
 <PageTitle>Blazing Pizza - My Orders</PageTitle>
 
@@ -39,8 +40,60 @@
 @code {
     IEnumerable<OrderWithStatus> orderWithStatus;
 
+    bool invalidOrder;
+    CancellationTokenSource pollingCancellationToken;
+
+
     protected override async Task OnParametersSetAsync()
     {
-        orderWithStatus = await HttpClient.GetFromJsonAsync<List<OrderWithStatus>>("orders");
+        //orderWithStatus = await HttpClient.GetFromJsonAsync<List<OrderWithStatus>>("orders");
+        pollingCancellationToken?.Cancel();
+        PollForUpdates();
+    }
+
+    private async void PollForUpdates()
+    {
+        pollingCancellationToken = new CancellationTokenSource();
+        while (!pollingCancellationToken.IsCancellationRequested)
+        {
+            try
+            {
+                invalidOrder = false;
+                orderWithStatus = await HttpClient.GetFromJsonAsync<List<OrderWithStatus>>($"orders");
+                StateHasChanged();
+
+                var OpenOrders = false;
+
+                foreach (OrderWithStatus thisOrder in orderWithStatus)
+                {
+                    if (!thisOrder.IsDelivered)
+                    {
+                        OpenOrders = true;
+                        break;
+                    }
+                }
+
+                if (!OpenOrders)
+                {
+                    pollingCancellationToken.Cancel();
+                }
+                else
+                {
+                    await Task.Delay(1000);
+                }
+            }
+            catch (Exception ex)
+            {
+                invalidOrder = true;
+                pollingCancellationToken.Cancel();
+                Console.Error.WriteLine(ex);
+                StateHasChanged();
+            }
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        pollingCancellationToken?.Cancel();
     }
 }
