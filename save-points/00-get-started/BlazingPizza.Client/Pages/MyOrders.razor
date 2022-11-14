@@ -1,5 +1,6 @@
 ﻿@page "/myorders"
-@inject HttpClient HttpClient
+
+@inject OrdersClient OrdersClient
 @implements IDisposable
 
 <PageTitle>Blazing Pizza - My Orders</PageTitle>
@@ -46,7 +47,6 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        //orderWithStatus = await HttpClient.GetFromJsonAsync<List<OrderWithStatus>>("orders");
         pollingCancellationToken?.Cancel();
         PollForUpdates();
     }
@@ -59,7 +59,8 @@
             try
             {
                 invalidOrder = false;
-                orderWithStatus = await HttpClient.GetFromJsonAsync<List<OrderWithStatus>>($"orders");
+                orderWithStatus = await OrdersClient.GetOrders();
+
                 StateHasChanged();
 
                 var OpenOrders = false;
@@ -81,6 +82,10 @@
                 {
                     await Task.Delay(1000);
                 }
+            }
+            catch (AccessTokenNotAvailableException ex)
+            {
+                ex.Redirect();
             }
             catch (Exception ex)
             {
