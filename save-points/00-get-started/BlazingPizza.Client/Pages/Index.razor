@@ -53,13 +53,13 @@
     </div>
 </div>
 
-@if (OrderState.ShowingConfigureDialog)
-{
-    <ConfigurePizzaDialog 
-        Pizza="OrderState.ConfiguringPizza" 
-        OnCancel="OrderState.CancelConfigurePizzaDialog"
-        OnConfirm="OrderState.ConfirmConfigurePizzaDialog"/>   
-}
+<TemplatedDialog Show="OrderState.ShowingConfigureDialog">
+    @*<ChildContent>*@
+        <ConfigurePizzaDialog Pizza="OrderState.ConfiguringPizza"
+            OnCancel="OrderState.CancelConfigurePizzaDialog"
+            OnConfirm="OrderState.ConfirmConfigurePizzaDialog" />
+    @*</ChildContent>*@
+</TemplatedDialog>
 
 @code {
     List<PizzaSpecial> specials;
