@@ -40,4 +40,9 @@ public class OrderState
     {
         Order = new Order();
     }
+
+    public void ReplaceOrder(Order order)
+    {
+        Order = order;
+    }
 }
