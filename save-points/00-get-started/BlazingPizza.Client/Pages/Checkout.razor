@@ -21,8 +21,11 @@
             </div>
         </div>
     
-        <button class="checkout-button btn btn-warning" type="submit">Place order</button>
+        <button class="checkout-button btn btn-warning" type="submit" disabled="@isSubmitting">Place order</button>
 
+        <div style="background-color:white">
+            <ValidationSummary />
+        </div>
         <DataAnnotationsValidator />
     </EditForm>
 </div>
